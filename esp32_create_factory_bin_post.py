@@ -21,21 +21,22 @@ Import("env")
 env = DefaultEnvironment()
 platform = env.PioPlatform()
 
-from genericpath import exists
 import sys
+from genericpath import exists
 from os.path import join
 
 sys.path.append(join(platform.get_package_dir("tool-esptoolpy")))
 import esptool
 
-FRAMEWORK_DIR = platform.get_package_dir("framework-arduinoespressif32")
+FRAMEWORK_DIR = platform.get_package_dir("framework-espidf")
 variants_dir = join(FRAMEWORK_DIR, "variants", "luciferin")
 
+
 def esp32_create_combined_bin(source, target, env):
-    #print("Generating combined binary for serial flashing")
+    # print("Generating combined binary for serial flashing")
     # factory_offset = -1      # error code value - currently unused
-    app_offset = 0x10000     # default value for "old" scheme
-    fs_offset = -1           # error code value
+    app_offset = 0x10000  # default value for "old" scheme
+    fs_offset = -1  # error code value
     new_file_name = env.subst("$BUILD_DIR/${PROGNAME}-factory.bin")
     sections = env.subst(env.get("FLASH_EXTRA_IMAGES"))
     firmware_name = env.subst("$BUILD_DIR/${PROGNAME}.bin")
@@ -73,8 +74,8 @@ def esp32_create_combined_bin(source, target, env):
     print(f" - {hex(app_offset)} | {firmware_name}")
     cmd += [hex(app_offset), firmware_name]
 
-    if(fs_offset != -1):
-        fs_bin = join(env.subst("$BUILD_DIR"),"littlefs.bin")
+    if (fs_offset != -1):
+        fs_bin = join(env.subst("$BUILD_DIR"), "littlefs.bin")
         if exists(fs_bin):
             before_reset = env.BoardConfig().get("upload.before_reset", "default_reset")
             after_reset = env.BoardConfig().get("upload.after_reset", "hard_reset")
@@ -94,10 +95,12 @@ def esp32_create_combined_bin(source, target, env):
                 ],
                 UPLOADCMD='"$PYTHONEXE" "$UPLOADER" $UPLOADERFLAGS ' + " ".join(cmd[7:])
             )
-            print("Will use custom upload command for flashing operation to add file system defined for this build target.")
+            print(
+                "Will use custom upload command for flashing operation to add file system defined for this build target.")
 
     # print('Using esptool.py arguments: %s' % ' '.join(cmd))
 
     esptool.main(cmd)
+
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", esp32_create_combined_bin)
