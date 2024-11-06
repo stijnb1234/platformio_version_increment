@@ -28,10 +28,6 @@ from os.path import join
 sys.path.append(join(platform.get_package_dir("tool-esptoolpy")))
 import esptool
 
-FRAMEWORK_DIR = platform.get_package_dir("framework-espidf")
-variants_dir = join(FRAMEWORK_DIR, "variants", "luciferin")
-
-
 def esp32_create_combined_bin(source, target, env):
     # print("Generating combined binary for serial flashing")
     # factory_offset = -1      # error code value - currently unused
